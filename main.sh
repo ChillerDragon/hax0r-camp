@@ -1,12 +1,14 @@
 #!/bin/bash
 
+source src/parse_shell.sh
+
 function parse_file() {
     filename=$1
     while read line;
     do
-        if [ "$line" == "\$(date)" ]
+        if [[ $line =~ (\$\(.*\)) ]]
         then
-            date
+            exec_shell "$line"
         else
             echo $line;
         fi
