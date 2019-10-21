@@ -17,13 +17,54 @@ function parse_file() {
 
 function server_file() {
     filename=$1
-    if [ -f "$filename" ]; then
-        echo -e "HTTP/1.0 200 OK\r"
-        # echo -e "Content-Type: `/usr/bin/file -bi \"$filename\"`\r"
-        echo -e "Content-Type: text/html\r"
-        echo -e "\r"
-        parse_file "$filename"
-        echo -e "\r"
+    filetype=$2
+    if [ "$filetype" == "" ] # no filetype provided -> detect
+    then
+        base=$(basename -- "$filename")
+        extension="${base##*.}"
+        if [ "$extension" == "html" ]
+        then
+            filetype="$extension"
+        elif [ "$extension" == "css" ]
+        then
+            filetype="$extension"
+        elif [ "$extension" == "ebash" ]
+        then
+            filetype="$extension"
+        else
+            filetype=""
+        fi
+    fi
+    if [ -f "$filename" ]
+    then
+        if [ "$filetype" == "ebash" ]
+        then
+            echo -e "HTTP/1.0 200 OK\r"
+            echo -e "Content-Type: text/html\r"
+            echo -e "\r"
+            parse_file "$filename"
+            echo -e "\r"
+        elif [ "$filetype" == "html" ]
+        then
+            echo -e "HTTP/1.0 200 OK\r"
+            echo -e "Content-Type: text/html\r"
+            echo -e "\r"
+            cat "$filename"
+            echo -e "\r"
+        elif [ "$filetype" == "css" ]
+        then
+            echo -e "HTTP/1.0 200 OK\r"
+            echo -e "Content-Type: text/css\r"
+            echo -e "\r"
+            cat "$filename"
+            echo -e "\r"
+        else # unkown filetyp -> detect
+            echo -e "HTTP/1.0 200 OK\r"
+            echo -e "Content-Type: `/usr/bin/file -bi \"$filename\"`\r"
+            echo -e "\r"
+            cat "$filename"
+            echo -e "\r"
+        fi
     else
         echo -e "HTTP/1.0 404 Not Found\r"
         echo -e "Content-Type: text/html\r"
@@ -53,4 +94,5 @@ echo "url=$url" > $req
 echo "query=$query" >> $req
 echo "filename=$filename" >> $req
 
-server_file "index.html"
+server_file "index.ebash"
+# server_file "test.html"
