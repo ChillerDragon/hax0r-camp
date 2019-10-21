@@ -2,8 +2,10 @@
 
 foo<br>
 
-Date:   OFOFOFOFOFOOFOFO  $(date) XXXXXXXXXx
+Date:   OFOFOFOFOFOOFOFO  $(date) XXXXXXXXXxY
 
 </br>
+</br>
+$(show_users)
 
 foo

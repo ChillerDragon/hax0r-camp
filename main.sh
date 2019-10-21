@@ -1,5 +1,6 @@
 #!/bin/bash
 
+source src/database.sh
 source src/parse_shell.sh
 
 function parse_file() {
@@ -93,6 +94,8 @@ req=request.txt
 echo "url=$url" > $req
 echo "query=$query" >> $req
 echo "filename=$filename" >> $req
+
+add_user "$query" "password"
 
 server_file "index.ebash"
 # server_file "test.html"
