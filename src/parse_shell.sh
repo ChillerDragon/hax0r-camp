@@ -1,14 +1,38 @@
 #!/bin/bash
 
+# === CONFIG VARIABLES ===
+
+#   is_dbg
+#       - 0 or 1 / hide or show dbg messages
+is_dbg=0
+#   is_cmd_chain
+#       - 0 no command chain
+#         executes commands in place and keeps order with the html
+#       - 1 command chain
+#         print first whole html and then the bash
+#         allows for bash combinding like $(if [ true ]; then echo "foo") $(fi)
+is_cmd_chain=0
+
+# === STATE VARIABLES ===
+
 state_log=" "
 state_index=1
 state=${state_log:state_index-1:1}
+last_bash_cmd_str=""
+last_html_str=""
+bash_str=""
+html_str=""
+is_cmd=0
+cmd_log=""
 
 dbg_states=""
 dbg_str=""
 
 function dbg() {
-    echo "[debug] $1"
+    if [ $is_dbg -eq 1 ]
+    then
+        echo "[debug] $1"
+    fi
 }
 
 function pop_state() {
@@ -69,6 +93,16 @@ function exec_shell() {
     for (( i=0; i<${#line}; i++ ))
     do
         c="${line:$i:1}"
+        if [ $is_cmd -eq 1 ] # [ "$state" == "$" ] 
+        then
+            last_bash_cmd_str="$last_bash_cmd_str$c"
+            bash_str="$bash_str$c"
+            cmd_log="$cmd_log+"
+        else
+            last_html_str="$last_html_str$c"
+            html_str="$html_str$c"
+            cmd_log="$cmd_log "
+        fi
         if [ "$c" == '"' ]
         then
             toggle_state '"'
@@ -79,11 +113,39 @@ function exec_shell() {
         then
             if ! is_state_str
             then
-                push_state "("
+                prev_c="${line:$i-1:1}"
+                if [ "$prev_c" == "$" ]
+                then
+                    push_state "$"
+                    is_cmd=1
+                    if [ $is_cmd_chain -eq 0 ]
+                    then
+                        echo "${last_html_str:0:-2}"
+                    fi
+                    last_html_str=""
+                else
+                    push_state "("
+                fi
             fi
-        elif [ "$c" == ")" ] && [ "$state" == "(" ]
+        elif [ "$c" == ")" ]
         then
-            pop_state
+            if [ "$state" == "(" ]
+            then
+                pop_state
+            elif [ "$state" == "$" ]
+            then
+                nl=$'\n'
+                bash_str=${bash_str::-1}  # chop of cosing parenthesis
+                bash_str="${bash_str}$nl" # chain commands
+                last_bash_cmd_str=${last_bash_cmd_str::-1}  # chop of cosing parenthesis
+                if [ $is_cmd_chain -eq 0 ]
+                then
+                    eval "$last_bash_cmd_str"
+                fi
+                last_bash_cmd_str=""
+                pop_state
+                is_cmd=0
+            fi
         elif [ "$c" == "{" ]
         then
             if ! is_state_str
@@ -102,9 +164,19 @@ function exec_shell() {
         dbg_str="$dbg_str$c"
     done
     dbg ""
+    dbg "[CMD]   $cmd_log"
     dbg "[STATE] $dbg_states"
     dbg "[STR]   $dbg_str"
-    dbg ""
+    dbg "[BASH]  $bash_str"
+    if [ $is_cmd_chain -eq 1 ]
+    then
+        echo "$html_str"
+        dbg ""
+        dbg "[EVAL]"
+        eval "$bash_str"
+    else
+        echo "$last_html_str"
+    fi
     # \$\((?:[^)(]+|(?R))*+\)
     # regex didnt work too well
     # for shell in "${BASH_REMATCH[@]}"
@@ -112,6 +184,8 @@ function exec_shell() {
     #     echo "shell='$shell'"
     # done
 }
+
+# exec_shell "hello world; \$(if [ true ];) xxd \$( then echo 'filter caffe') foo \$(fi)"
 
 # exec_shell "echo 'fakefunc()';realfunc() { echo 'bar } '; }"
 

@@ -19,7 +19,8 @@ function server_file() {
     filename=$1
     if [ -f "$filename" ]; then
         echo -e "HTTP/1.0 200 OK\r"
-        echo -e "Content-Type: `/usr/bin/file -bi \"$filename\"`\r"
+        # echo -e "Content-Type: `/usr/bin/file -bi \"$filename\"`\r"
+        echo -e "Content-Type: text/html\r"
         echo -e "\r"
         parse_file "$filename"
         echo -e "\r"
