@@ -31,7 +31,7 @@ dbg_str=""
 function dbg() {
     if [ $is_dbg -eq 1 ]
     then
-        echo "[debug] $1"
+        echo "[debug] $1<br>"
     fi
 }
 
@@ -176,6 +176,7 @@ function exec_shell() {
         eval "$bash_str"
     else
         echo "$last_html_str"
+        last_html_str=""
     fi
     # \$\((?:[^)(]+|(?R))*+\)
     # regex didnt work too well
