@@ -97,5 +97,11 @@ echo "filename=$filename" >> $req
 
 add_user "$query" "password"
 
-server_file "index.ebash"
+if [ "$url" == "/" ]
+then
+    server_file "index.ebash" # default show index
+else
+    server_file "${url:1}" # chop of the /
+fi
+
 # server_file "test.html"
