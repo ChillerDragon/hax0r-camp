@@ -8,6 +8,19 @@ Date:   OFOFOFOFOFOOFOFO  $(date) XXXXXXXXXxY
 </br>
 </br>
 <h2>Users:</h2>
-$(show_users)
+$(ls)
 
-foo
+</br>
+</br>
+<a href="delete.ebash">delete database</a>
+</br>
+<form action="/login.ebash" method="get">
+    Username:<br>
+    <input type="text" name="username" value=""><br>
+    Password:<br>
+    <input type="password" name="password" value=""><br><br>
+    <input type="submit" value="Submit">
+</form>
+
+<h2> last 10 users:</h2>
+$(show_users)

@@ -2,11 +2,15 @@
 
 source src/database.sh
 source src/parse_shell.sh
+source src/lib.sh
 
 function parse_file() {
     filename=$1
     while read line;
     do
+        # parse every line to support multi line thingys
+        # didnt work too well with debug mode
+        # exec_shell "$line"
         if [[ $line =~ (\$\(.*\)) ]]
         then
             exec_shell "$line"
@@ -94,8 +98,6 @@ req=request.txt
 echo "url=$url" > $req
 echo "query=$query" >> $req
 echo "filename=$filename" >> $req
-
-add_user "$query" "password"
 
 if [ "$url" == "/" ]
 then

@@ -1,0 +1,5 @@
+deleting database...
+$(delete_database)
+
+<br>
+<a href="index.ebash">back</a>

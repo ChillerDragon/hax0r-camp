@@ -90,6 +90,7 @@ function is_state_str() {
 function exec_shell() {
     local line=$1
     local i
+    local c
     for (( i=0; i<${#line}; i++ ))
     do
         c="${line:$i:1}"
@@ -141,6 +142,7 @@ function exec_shell() {
                 if [ $is_cmd_chain -eq 0 ]
                 then
                     eval "$last_bash_cmd_str"
+                    last_bash_cmd_str=""
                 fi
                 last_bash_cmd_str=""
                 pop_state
@@ -174,10 +176,12 @@ function exec_shell() {
         dbg ""
         dbg "[EVAL]"
         eval "$bash_str"
+        bash_str=""
     else
         echo "$last_html_str"
         last_html_str=""
     fi
+    dbg_str=""
     # \$\((?:[^)(]+|(?R))*+\)
     # regex didnt work too well
     # for shell in "${BASH_REMATCH[@]}"
